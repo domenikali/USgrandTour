@@ -1,2 +1,4 @@
 # US grand tour
-Using A* algorithm and google maps api to create the sortest path between selected city/national park in US
+
+Using the A* algorithm and the Google Maps API to find the shortest path between selected points in the US
+All distances will be in KM, and it will count the short distance by car.
