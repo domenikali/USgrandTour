@@ -1,12 +1,15 @@
 import requests
+from geopy.geocoders import Nominatim
+geolocator = Nominatim(user_agent="test")
 
-part ="11.32730,44.49931"
-dest = "11.4814,44.4426"
-url = 'http://router.project-osrm.org/route/v1/driving/'+ part +';'+dest
+dep_city = geolocator.geocode("Bologna")
+arr_city = geolocator.geocode("Imola")
+
+url = 'http://router.project-osrm.org/route/v1/driving/'+str( dep_city.longitude) +','+ str(dep_city.latitude)+';'+str( arr_city.longitude) +','+ str(arr_city.latitude)
 r = requests.get(url)
 res = r.json()
 distance =res['routes'][0]['distance']
 duration = res['routes'][0]['duration']
 
-print(distance/1000 )
-print(duration/60)
+print("KM: "+str(distance/1000) )
+print("min: "+str(round(duration/60)))
