@@ -9,7 +9,7 @@ All distances will be in KM, and it will count the short distance by car.
 
 For the api I chose the OSMR API based on Opne Street Map, using the 'request' library in python is possible to recive the query and know the shortest driving distance between two points
 
-Using this API we can fill a matrix with the distance of the city between each other creating a connected graph by adjacency matrix
+Using this API we can fill a matrix with the distance of the city between each other creating a connected graph 
 
 # TODOs
 
