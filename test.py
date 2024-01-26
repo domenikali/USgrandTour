@@ -72,12 +72,12 @@ def fill_matrix(list):
 def distance_form_stretch(stretch_matrix):
     l = len(stretch_matrix[0])
     distance_matrix = np.zeros((l,l))
-    for x in range(l):
-        for y in range(l):
-            if isinstance(stretch_matrix[x][y],Stretch):
-                distance_matrix[x][y]=stretch_matrix[x][y].distance
-            else:
-                distance_matrix[x][y]=0
+
+    for (x,y),el in np.ndenumerate(stretch_matrix):
+        if isinstance(el,Stretch):
+            distance_matrix[x][y]=el.distance
+        else:
+            distance_matrix[x][y]=0
 
     return distance_matrix
 
@@ -109,13 +109,13 @@ def print_map(stretch_matrix,minimum_tree):
     tot_distance=0
     tot_duration =0
     m = folium.Map(location=[ 40.072666376,-102.222165778],zoom_start=5)
-    for x in range(length):
-        for y in range(length):
-            if(minimum_tree[x][y]!=0):
-                stretch=stretch_matrix[x][y]
-                tot_distance+=stretch.distance
-                tot_duration+=stretch.duration
-                m=print_geometry(stretch,m)
+
+    for (x,y),el in np.ndenumerate(minimum_tree):
+        if (el!=0):
+            stretch=stretch_matrix[x][y]
+            tot_distance+=stretch.distance
+            tot_duration+=stretch.duration
+            m=print_geometry(stretch,m)
 
     print("total duration: "+str(tot_duration/60)+"h")
     print("total distance: "+str(tot_distance)+"KM")
@@ -140,5 +140,5 @@ def main():
 
     print_map(stretch_matrix,minimum_tree)
     
-
-main()
+if __name__ =="__main__":
+    main()
