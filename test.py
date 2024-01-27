@@ -7,6 +7,8 @@ from scipy.sparse import csr_matrix
 from scipy.sparse.csgraph import minimum_spanning_tree
 import polyline
 import folium
+import operator
+from itertools import combinations
 
 geolocator = Nominatim(user_agent="test")
 
@@ -41,6 +43,7 @@ def populate (string):
     
     return list
 
+#return a stretch object by calling the OSRM api
 def get_stretch(dep_city,arr_city):
     #print(string)
     string = dep_city.coordinate()+";"+arr_city.coordinate()
@@ -69,6 +72,7 @@ def fill_matrix(list):
     
     return distance_matrix
 
+#return a matrix of distance based on the full stretch matrix
 def distance_form_stretch(stretch_matrix):
     l = len(stretch_matrix[0])
     distance_matrix = np.zeros((l,l))
@@ -81,6 +85,7 @@ def distance_form_stretch(stretch_matrix):
 
     return distance_matrix
 
+#print a single rout in a folium map
 def print_geometry(stretch,m):
     
     route =polyline.decode(stretch.route)
@@ -104,6 +109,7 @@ def print_geometry(stretch,m):
 
     return m
 
+#print the rout map based on a adjacent matrix
 def print_map(stretch_matrix,minimum_tree):
     length = len(minimum_tree[0])
     tot_distance=0
@@ -121,6 +127,7 @@ def print_map(stretch_matrix,minimum_tree):
     print("total distance: "+str(tot_distance)+"KM")
     m.save("map.html")
 
+#compute the odd verticis of the minimum spanning tree
 def compute_odd_vert(minimum_tree,list):
     odd_vert = []
 
@@ -137,28 +144,80 @@ def compute_odd_vert(minimum_tree,list):
         if count %2!=0:
             odd_vert.append(list[i])
 
-    return odd_vert    
+    return odd_vert
 
+#eliminate all non perfect matching from the combination
+def clean_list(altro):
+    t=[]
+    for x in altro:
+        
+        temp=[]
+        for (a,b) in x:
+            temp.append(a)
+            temp.append(b)
+        if len(set(temp))==len(x)*2:
+            t.append(x)
+    return t
+
+#return the total distance of the matching
+def get_distance(s,stretch_matrix,city_list):
+    distance =0
+    for (x,y) in s:
+        x_index = city_list.index(x)
+        y_index = city_list.index(y)
+        distance+=stretch_matrix[x_index][y_index].distance
+    return distance
+
+# return the minimum weight perfect matching for the matrix based on distance 
+def perfect_matching(matching_list,stretch_matrix,city_list):
+    km = get_distance(matching_list[0],stretch_matrix,city_list)
+    shortest = matching_list[0]
+    for x in matching_list:
+        temp=get_distance(x,stretch_matrix,city_list)
+        if temp<km:
+            km=temp
+            shortest=x
+    return shortest
+
+#add perfect matching into the minimum spanning tree
+def add_matching(minimum_tree,matching,city_list):
+    for (x,y) in matching:
+        x_index = city_list.index(x)
+        y_index = city_list.index(y)
+        minimum_tree[x_index][y_index]=1
+
+    return minimum_tree
 
 def main():
+    #places to visit
     place = ["Washington D.C.","New York","Boston","Buffalo, NY","Detroit","Chicago","San Francisco","San Jose","Los Angeles","Miami","Houston","New Orleans","Las Vegas","West Glacier, MT","Tusayan","Jackson Hole, WY","El Portal, CA"]
-    err = ["Washington D.C.","New York","Boston","Buffalo"]
+    err = ["Washington D.C.","New York","Boston","Richmond"]
 
+    #calculating route for each place to each other and form a complete graph
     start_time = time.perf_counter()
-    list = populate(place)
-    stretch_matrix= fill_matrix(list)
+    city_list = populate(place)
+    stretch_matrix= fill_matrix(city_list)
     end_time = time.perf_counter()
-    
-    print("time ellapsed: "+ str(end_time-start_time))
+    print("time ellapsed during requests: "+ str(end_time-start_time))
 
+    #find a minimum spanning tree using distance as primary selector
     distance_matrix=distance_form_stretch(stretch_matrix)
-    
     Tcsr = minimum_spanning_tree(distance_matrix)
     minimum_tree = Tcsr.toarray()
-    odd_verticis = compute_odd_vert(minimum_tree,list)
-    for c in odd_verticis:
-        print(c)
+
+    #minimum weight perfect matching brute force
+    odd_verticis = compute_odd_vert(minimum_tree,city_list)
+    res = list(combinations(odd_verticis,2))
+    matching_list = set(list(combinations(res,int(len(odd_verticis)/2))))
+    matching_list = clean_list(matching_list)
+    matching = perfect_matching(matching_list,stretch_matrix,city_list)
+
+    #debug and map printing  
+    print("added distance: ",get_distance(matching,stretch_matrix,city_list))
+    minimum_tree = add_matching(minimum_tree,matching,city_list)
     print_map(stretch_matrix,minimum_tree)
+    start_time = time.perf_counter()
+    print("time ellapsed during algo: "+ str(start_time-end_time))
     
 if __name__ =="__main__":
     main()
