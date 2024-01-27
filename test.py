@@ -121,6 +121,24 @@ def print_map(stretch_matrix,minimum_tree):
     print("total distance: "+str(tot_distance)+"KM")
     m.save("map.html")
 
+def compute_odd_vert(minimum_tree,list):
+    odd_vert = []
+
+    #for (x,y),el in np.ndenumerate(minimum_tree):
+    
+    for i in range(len(minimum_tree)):
+        count =0
+        for j in range(len(minimum_tree)):
+            if i!=j:
+                if minimum_tree[i][j]!=0:
+                    count+=1
+                if minimum_tree[j][i]!=0:
+                    count+=1
+        if count %2!=0:
+            odd_vert.append(list[i])
+
+    return odd_vert    
+
 
 def main():
     place = ["Washington D.C.","New York","Boston","Buffalo, NY","Detroit","Chicago","San Francisco","San Jose","Los Angeles","Miami","Houston","New Orleans","Las Vegas","West Glacier, MT","Tusayan","Jackson Hole, WY","El Portal, CA"]
@@ -137,7 +155,9 @@ def main():
     
     Tcsr = minimum_spanning_tree(distance_matrix)
     minimum_tree = Tcsr.toarray()
-
+    odd_verticis = compute_odd_vert(minimum_tree,list)
+    for c in odd_verticis:
+        print(c)
     print_map(stretch_matrix,minimum_tree)
     
 if __name__ =="__main__":
