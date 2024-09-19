@@ -190,7 +190,7 @@ def add_matching(minimum_tree,matching,city_list):
 
 def main():
     #places to visit
-    place = ["Washington D.C.","New York","Boston","Buffalo, NY","Detroit","Chicago","San Francisco","San Jose","Los Angeles","Miami","Houston","New Orleans","Las Vegas","West Glacier, MT","Tusayan","Jackson Hole, WY","El Portal, CA"]
+    place = ["Washington D.C.","New York","Boston","Buffalo, NY","Detroit","Chicago","San Francisco","San Jose","Los Angeles","Miami","Houston","New Orleans","Las Vegas","West Glacier, MT","Tusayan","Jackson Hole, WY","El Portal, CA","Seattle"]
     err = ["Washington D.C.","New York","Boston","Richmond"]
 
     #calculating route for each place to each other and form a complete graph
